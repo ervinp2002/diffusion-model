@@ -1,24 +1,30 @@
+/*
+Ervin Pangilinan
+CSC 330: Organization of Programming Languages - Fall 2022
+Project 2: Simplified 3D Diffusion Model
+Implementation in C++
+*/
+
 #include <iostream>
 #include <algorithm>
 #include <cmath>
-#include <vector>
 using namespace std;
 
 // Basing implementation on Java sample code from class.
-int main() {
+int main(int argc, char *argv[]) {
     // PRE: Flags are set to determine room dimension and if there's a partition in the room.
     // POST: Outputs the ratio of concentration and time taken to equilibrate the room. 
 
-    const int maxSize = 10;
-    double *room = new double[maxSize * maxSize * maxSize];
-    double diffusionCoefficient = 0.175;
-    double roomDimension = 5;                      // 5 Meters
-    double speedOfGasMolecules = 250.0;          // Based on 100 g/mol gas at RT
+    // Number of subdivisions per dimension is determined by command-line argument. Defaults to 10 if there's no argument. 
+    const int maxSize = atoi(argv[argc - 1]) > 0 ? atoi(argv[argc - 1]) : 10;
 
+    double *room = new double[maxSize * maxSize * maxSize]; // Attempt at dynamic allocation for scalability.
+    double diffusionCoefficient = 0.175;
+    double roomDimension = 5;                      // In meters.
+    double speedOfGasMolecules = 250.0;          // Based on 100 g/mol gas at RT.
     double timestep = (roomDimension / speedOfGasMolecules) / maxSize;          // h in seconds
     double distanceBetweenBlocks = roomDimension / maxSize;
     double DTerm = diffusionCoefficient * timestep / (distanceBetweenBlocks * distanceBetweenBlocks);
-
     double time = 0;
     double ratio = 0;
 
@@ -41,46 +47,52 @@ int main() {
                         for (int l = 0; l < maxSize; l++) {
                             for (int m = 0; m < maxSize; m++) {
                                 for (int n = 0; n < maxSize; n++) {
+                                    if (((i == l) && (j == m) && (k == n + 1)) ||  // move up
+                                        ((i == l) && (j == m) && (k == n - 1)) ||  // move down
+                                        ((i == l) && (j == m + 1) && (k == n)) ||  // move right
+                                        ((i == l) && (j == m - 1) && (k == n)) ||  // move left
+                                        ((i == l + 1) && (j == m) && (k == n)) ||  // move forward
+                                        ((i == l - 1) && (j == m) && (k == n))) {  // move backwards
 
-                                    if (    ( (i == l) && (j == m) && (k == n + 1) ) || // move up
-                                            ( (i == l) && (j == m) && (k == n - 1) ) || // move down
-                                            ( (i == l) && (j == m + 1) && (k == n) ) ||  // move right
-                                            ( (i == l) && (j == m - 1) && (k == n) ) ||  // move left
-                                            ( (i == l + 1) && (j == m) && (k == n) ) ||   // move forward
-                                            ( (i == l - 1) && (j == m) && (k == n) ) ) {  // move backwards
+                                        double change = ((*(room + ((i * int(pow(maxSize, 2))) + (j * maxSize) + k))) 
+                                                        - *(room + ((l * int(pow(maxSize, 2)) + (m * maxSize) + n)))) 
+                                                        * DTerm;
 
-                                        double change = ((*(room + (i * j * k))) - *(room + (l * m * n))) * DTerm;
-                                        *(room + (i * j * k)) = *(room + (i * j * k)) - change;
-                                        *(room + (l * m * n)) = *(room + (l * m * n)) + change;
-                                    }
+                                        *(room + ((i * int(pow(maxSize, 2))) + (j * maxSize) + k)) = *(room + ((i * int(pow(maxSize, 2))) 
+                                                                                                    + (j * maxSize) + k)) 
+                                                                                                    - change;
+
+                                        *(room + (l * int(pow(maxSize, 2)) + (m * maxSize) + n)) = *(room + (l * int(pow(maxSize, 2)) 
+                                                                                                    + (m * maxSize) + n)) 
+                                                                                                    + change;
                                 }
                             }
                         }
                     }
                 }
             }
+        }
 
         time += timestep;
-        double sumval = 0.0;
         double maxval = *room;
         double minval = *room;
 
         for (int i = 0; i < maxSize; i++) {
             for (int j = 0; j < maxSize; j++) {
                 for (int k = 0; k < maxSize; k++) {
-                    maxval = max(*(room + (i * j * k)), maxval);
-                    minval = min(*(room + (i * j * k)), minval);
-                    sumval += *(room + (i * j * k));
+                    maxval = max(*(room + ((i * int(pow(maxSize, 2))) + (j * maxSize) + k)), maxval);
+                    minval = min(*(room + ((i * int(pow(maxSize, 2))) + (j * maxSize) + k)), minval);
                 }
             }
         }
 
         ratio = minval / maxval;
-        cout << "Ratio: " << ratio << "\t\tTime: " << time << endl;
+        cout << "(" << ratio << ", " << time << ")" << endl;
     } while (ratio < 0.99);
-
+    
     cout << "Box equilibrated in " << time << " seconds of simulated time." << endl;
 
     delete[] room;
+    room = NULL;
     return 0;
 }
