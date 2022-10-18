@@ -95,8 +95,8 @@ int main(int argc, char *argv[]) {
 
         /* Extreme pointer dereferencing where accessing 3D array indices are done by dereferencing then pulling 
         an address dereferencing that address until the addresses for each dimensions have been dereferenced. */
-        cout << *(&*(&*(room + (maxSize - 1)) + maxSize - 1)) << " \t";
-        cout << *(&*(&*(room + (maxSize - 1)) + maxSize - 1) + maxSize - 1) << " \t";
+        cout << *(&*(&*(room + (int(pow(maxSize, 2)))) + (maxSize * 10) - 1)) << " \t";
+        cout << *(&*(&*(room + (int(pow(maxSize, 2)))) + (maxSize * 10) - 1) + (maxSize - 1))<< " \t";
         cout << sumval << "\n";
 
     } while (ratio < 0.99);
