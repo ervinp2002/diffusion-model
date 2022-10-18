@@ -74,6 +74,7 @@ int main(int argc, char *argv[]) {
         }
 
         time += timestep;
+        double sumval = 0.0;
         double maxval = *room;
         double minval = *room;
 
@@ -82,17 +83,27 @@ int main(int argc, char *argv[]) {
                 for (int k = 0; k < maxSize; k++) {
                     maxval = max(*(room + ((i * int(pow(maxSize, 2))) + (j * maxSize) + k)), maxval);
                     minval = min(*(room + ((i * int(pow(maxSize, 2))) + (j * maxSize) + k)), minval);
+                    sumval += *(room + ((i * int(pow(maxSize, 2))) + (j * maxSize) + k));
                 }
             }
         }
 
         ratio = minval / maxval;
-        cout << "(" << ratio << ", " << time << ")" << endl;
-    } while (ratio < 0.99);
-    
-    cout << "Box equilibrated in " << time << " seconds of simulated time." << endl;
+        //cout << "Ratio:\t" << ratio << " \tTime:\t" << time << endl;
+        cout << time << "\t" << *room << "\t";
+        cout << *(room + maxSize - 1) << " \t";
 
+        /* Extreme pointer dereferencing where accessing 3D array indices are done by dereferencing then pulling 
+        an address dereferencing that address until the addresses for each dimensions have been dereferenced. */
+        cout << *(&*(&*(room + (maxSize - 1)) + maxSize - 1)) << " \t";
+        cout << *(&*(&*(room + (maxSize - 1)) + maxSize - 1) + maxSize - 1) << " \t";
+        cout << sumval << "\n";
+
+    } while (ratio < 0.99);
     delete[] room;
     room = NULL;
+
+    cout << "Box equilibrated in " << time << " seconds of simulated time." << endl;
+
     return 0;
 }
