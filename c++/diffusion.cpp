@@ -6,6 +6,7 @@ Implementation in C++
 */
 
 #include <iostream>
+#include <iomanip>
 #include <algorithm>
 #include <cmath>
 using namespace std;
@@ -90,20 +91,20 @@ int main(int argc, char *argv[]) {
 
         ratio = minval / maxval;
         //cout << "Ratio:\t" << ratio << " \tTime:\t" << time << endl;
-        cout << time << "\t" << *room << "\t";
-        cout << *(room + maxSize - 1) << " \t";
+        cout << setprecision(6) << time << "\t";
+        cout << setprecision(6) << *room << "\t";
+        cout << *(room + (int(pow(maxSize, 3)) - int(pow(maxSize, 2)))) << " \t";
 
         /* Extreme pointer dereferencing where accessing 3D array indices are done by dereferencing then pulling 
-        an address dereferencing that address until the addresses for each dimensions have been dereferenced. */
-        cout << *(&*(&*(room + (int(pow(maxSize, 2)))) + (maxSize * 10) - 1)) << " \t";
-        cout << *(&*(&*(room + (int(pow(maxSize, 2)))) + (maxSize * 10) - 1) + (maxSize - 1))<< " \t";
+        an address then dereferencing that address until the addresses for each dimensions have been dereferenced. */
+        cout << setprecision(6) << *(&*(&*(room + (int(pow(maxSize, 3)) - int(pow(maxSize, 2)))) + (int(pow(maxSize, 2)) - maxSize))) << " \t";
+        cout << setprecision(6) << *(&*(&*(room + (int(pow(maxSize, 3)) - int(pow(maxSize, 2)))) + (int(pow(maxSize, 2)) - maxSize)) + (maxSize - 1)) << " \t";
         cout << sumval << "\n";
 
     } while (ratio < 0.99);
+
     delete[] room;
     room = NULL;
-
     cout << "Box equilibrated in " << time << " seconds of simulated time." << endl;
-
     return 0;
 }
