@@ -6,9 +6,9 @@ Implementation in C++
 */
 
 #include <iostream>
-#include <iomanip>
 #include <algorithm>
 #include <cmath>
+#include <vector>
 using namespace std;
 
 // Basing implementation on Java sample code from class.
@@ -19,7 +19,9 @@ int main(int argc, char *argv[]) {
     // Number of subdivisions per dimension is determined by command-line argument. Defaults to 10 if there's no argument. 
     const int maxSize = atoi(argv[argc - 1]) > 0 ? atoi(argv[argc - 1]) : 10;
 
-    double *room = new double[maxSize * maxSize * maxSize]; // Attempt at dynamic allocation for scalability.
+    // Attempt at dynamic allocation for scalability.
+    vector<vector<vector<double>>> room(maxSize, vector<vector<double>>(10, vector<double> (10, 0))); 
+
     double diffusionCoefficient = 0.175;
     double roomDimension = 5;                      // In meters.
     double speedOfGasMolecules = 250.0;          // Based on 100 g/mol gas at RT.
@@ -29,17 +31,8 @@ int main(int argc, char *argv[]) {
     double time = 0;
     double ratio = 0;
 
-    // Set every point in the room to 0.
-    for (int i = 0; i < maxSize; i++) {
-        for (int j = 0; j < maxSize; j++) {
-            for (int k = 0; k < maxSize; k++) {
-                *(room + (i * maxSize * maxSize + j * maxSize + k)) = 0;
-            }
-        }
-    }
-
     // Initialize first cell so it first contains the molecules.
-    *room = 1.0e21;
+    room[0][0][0] = 1.0e21;
 
     do {
         for (int i = 0; i < maxSize; i++) {
@@ -55,17 +48,9 @@ int main(int argc, char *argv[]) {
                                         ((i == l + 1) && (j == m) && (k == n)) ||  // move forward
                                         ((i == l - 1) && (j == m) && (k == n))) {  // move backwards
 
-                                        double change = ((*(room + ((i * int(pow(maxSize, 2))) + (j * maxSize) + k))) 
-                                                        - *(room + ((l * int(pow(maxSize, 2)) + (m * maxSize) + n)))) 
-                                                        * DTerm;
-
-                                        *(room + ((i * int(pow(maxSize, 2))) + (j * maxSize) + k)) = *(room + ((i * int(pow(maxSize, 2))) 
-                                                                                                    + (j * maxSize) + k)) 
-                                                                                                    - change;
-
-                                        *(room + (l * int(pow(maxSize, 2)) + (m * maxSize) + n)) = *(room + (l * int(pow(maxSize, 2)) 
-                                                                                                    + (m * maxSize) + n)) 
-                                                                                                    + change;
+                                        double change = (room[i][j][k] - room[l][m][n]) * DTerm;
+                                        room[i][j][k] = room[i][j][k] - change;
+                                        room[l][m][n] = room[l][m][n] + change;
                                 }
                             }
                         }
@@ -76,35 +61,28 @@ int main(int argc, char *argv[]) {
 
         time += timestep;
         double sumval = 0.0;
-        double maxval = *room;
-        double minval = *room;
+        double maxval = room[0][0][0];
+        double minval = room[0][0][0];
 
         for (int i = 0; i < maxSize; i++) {
             for (int j = 0; j < maxSize; j++) {
                 for (int k = 0; k < maxSize; k++) {
-                    maxval = max(*(room + ((i * int(pow(maxSize, 2))) + (j * maxSize) + k)), maxval);
-                    minval = min(*(room + ((i * int(pow(maxSize, 2))) + (j * maxSize) + k)), minval);
-                    sumval += *(room + ((i * int(pow(maxSize, 2))) + (j * maxSize) + k));
+                    maxval = max(room[i][j][k], maxval);
+                    minval = min(room[i][j][k], minval);
+                    sumval += room[i][j][k];
                 }
             }
         }
 
         ratio = minval / maxval;
-        //cout << "Ratio:\t" << ratio << " \tTime:\t" << time << endl;
-        cout << setprecision(6) << time << "\t";
-        cout << setprecision(6) << *room << "\t";
-        cout << *(room + (int(pow(maxSize, 3)) - int(pow(maxSize, 2)))) << " \t";
-
-        /* Extreme pointer dereferencing where accessing 3D array indices are done by dereferencing then pulling 
-        an address then dereferencing that address until the addresses for each dimensions have been dereferenced. */
-        cout << setprecision(6) << *(&*(&*(room + (int(pow(maxSize, 3)) - int(pow(maxSize, 2)))) + (int(pow(maxSize, 2)) - maxSize))) << " \t";
-        cout << setprecision(6) << *(&*(&*(room + (int(pow(maxSize, 3)) - int(pow(maxSize, 2)))) + (int(pow(maxSize, 2)) - maxSize)) + (maxSize - 1)) << " \t";
-        cout << sumval << "\n";
+        cout << time << " \t " << room[0][0][0] <<  " \t ";
+        cout << room[maxSize - 1][0][0] << " \t ";
+        cout << room[maxSize - 1][maxSize - 1][0] << " \t ";
+        cout << room[maxSize - 1][maxSize - 1][maxSize - 1] << " \t ";
+        cout << sumval << endl;
 
     } while (ratio < 0.99);
 
-    delete[] room;
-    room = NULL;
     cout << "Box equilibrated in " << time << " seconds of simulated time." << endl;
     return 0;
 }
