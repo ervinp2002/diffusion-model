@@ -33,7 +33,7 @@ def propagate_molecules(room, time, timestep, D_Term, max_size, ratio):
             sumval += room[i][j][k]
 
         ratio = minval / maxval
-        print(str(time) + " \t " + str(room[0][0][0]) + " \t ", end = "")
+        print(str(round(time, 3)) + " \t " + str(room[0][0][0]) + " \t ", end = "")
         print(str(room[max_size - 1][0][0]) + " \t " + str(room[max_size - 1][max_size - 1][0]) + " \t ", end = "")
         print(str(room[max_size - 1][max_size - 1][max_size - 1]) + " \t " + str(sumval))
 
