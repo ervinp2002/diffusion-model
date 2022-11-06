@@ -87,4 +87,4 @@ while ratio < 0.99
     println(" \t ", string(ratio))
 end
      
-println("Box equilibrated in " + string(round(time; digits = 3)) + " seconds of simulated time.")
+println("Box equilibrated in ", string(round(time; digits = 3)), " seconds of simulated time.")
