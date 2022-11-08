@@ -140,10 +140,10 @@ int main(int argc, char *argv[]) {
     // POST: Outputs the ratio of concentration and time taken to equilibrate the room. 
 
     // Number of subdivisions per dimension is determined by command-line argument. Defaults to 10 if there's no argument. 
-    const int maxSize = atoi(argv[argc - 1]) > 0 ? atoi(argv[argc - 1]) : 10;
+    const int maxSize = atoi(argv[argc - 2]) > 0 ? atoi(argv[argc - 2]) : 10;
 
     // Specify if there is a flag to set up partition in the room.
-    string arg2 = argv[argc - 2];
+    string arg2 = argv[argc - 1];
     bool partitionPresent = arg2 == "partition" ? true : false;
     
     // Attempt at dynamic allocation for scalability.
@@ -152,7 +152,7 @@ int main(int argc, char *argv[]) {
 
     if (partitionPresent) {
         setBitMask(mask, maxSize);
-        
+        /*
         for (int i = 0; i < maxSize + 2; i++) {
           for (int j = 0; j < maxSize + 2; j++) {
             for (int k = 0; k < maxSize + 2; k++) {
@@ -161,7 +161,7 @@ int main(int argc, char *argv[]) {
               cout << endl;
           }
           cout << endl;
-        }
+        }*/
     }
 
     double diffusionCoefficient = 0.175;
@@ -209,6 +209,6 @@ int main(int argc, char *argv[]) {
 
     } while (ratio < 0.99);
 
-    std::cout << "Box equilibrated in " << time << " seconds of simulated time." << endl;
+    std::cout << "\nBox equilibrated in " << time << " seconds of simulated time." << endl;
     return 0;
 }
