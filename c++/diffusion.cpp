@@ -5,6 +5,7 @@ Project 2: Simplified 3D Diffusion Model
 Implementation in C++
 */
 
+// On command line: ./[binary file name] [number of subdivisions] ["partition" (leave blank if none)]
 using namespace std;
 #include <iostream>
 #include <algorithm>
@@ -149,20 +150,7 @@ int main(int argc, char *argv[]) {
     // Attempt at dynamic allocation for scalability.
     Cube room(maxSize, Matrix(maxSize, vector<double> (maxSize, 0))); 
     BitMask mask(maxSize + 2, CrossSection(maxSize + 2, vector<int> (maxSize + 2, 0)));
-
-    if (partitionPresent) {
-        setBitMask(mask, maxSize);
-        /*
-        for (int i = 0; i < maxSize + 2; i++) {
-          for (int j = 0; j < maxSize + 2; j++) {
-            for (int k = 0; k < maxSize + 2; k++) {
-              cout << mask[i][j][k] << " ";
-            }
-              cout << endl;
-          }
-          cout << endl;
-        }*/
-    }
+    if (partitionPresent) setBitMask(mask, maxSize);
 
     double diffusionCoefficient = 0.175;
     double roomDimension = 5;                                                   // In meters.
