@@ -3,8 +3,8 @@
 -- Project 2: Simplified 3D Diffusion Model
 -- Implementation in Ada
 
-with Ada.Text_IO, Ada.Integer_Text_IO, Ada.Float_Text_IO, Ada.Command_Line, Ada.Characters.Latin_1;
-use Ada.Text_IO, Ada.Integer_Text_IO, Ada.Float_Text_IO, Ada.Command_Line, Ada.Characters.Latin_1;
+with Ada.Text_IO, Ada.Float_Text_IO, Ada.Command_Line, Ada.Characters.Latin_1;
+use Ada.Text_IO, Ada.Float_Text_IO, Ada.Command_Line, Ada.Characters.Latin_1;
 
 procedure Diffusion is
 -- MAIN PROGRAM
@@ -13,7 +13,6 @@ procedure Diffusion is
     type Cube is array (Integer range <>, Integer range <>, Integer range <>) of Long_Float;
     maxSize: Integer := Integer'Value(Argument(1));
     
-
 begin
     if maxSize < 0 then
         maxSize := 10;
@@ -29,7 +28,7 @@ begin
         DTerm: Long_Float := (diffusionCoefficient * timestep) / (distanceBetweenBlocks * distanceBetweenBlocks);
 
         -- Variables to be modified during simulation
-        room: Cube (1..maxSize, 1..maxSize, 1..maxSize);
+        room: Cube(1..maxSize, 1..maxSize, 1..maxSize);
         change: Long_Float;
         sumval: Long_Float;
         minval: Long_Float;
@@ -42,9 +41,8 @@ begin
         time := 0.0;
         change := 0.0;
         sumval := 0.0;
-        minval := 0.0;
-        maxval := 0.0;
         ratio := 0.0;
+        room(1, 1, 1) := 1.0e21;
 
         while ratio < 0.99 loop
             for i in 1..maxSize loop
@@ -72,18 +70,18 @@ begin
 
             time := time + timestep;
             sumval := 0.0;
-            minval := Long_Float(room(1, 1, 1));
-            maxval := Long_Float(room(1, 1, 1));
+            minval := room(1, 1, 1);
+            maxval := room(1, 1, 1);
             for i in 1..maxSize loop
                 for j in 1..maxSize loop
                     for k in 1..maxSize loop
-                        minval := (if minval > room(i, j, k) then room(i, j, k) else minval);
-                        maxval := (if maxval < room(i, j, k) then room(i, j, k) else maxval);
-                        sumval := sumval + Long_Float(room(i, j, k));
+                        minval := (if room(i, j, k) < minval  then room(i, j, k) else minval);
+                        maxval := (if room(i, j, k) > maxval  then room(i, j, k) else maxval);
+                        sumval := sumval + room(i, j, k);
                     end loop;
                 end loop;
             end loop;
-            ratio := Long_Float(minval) / Long_Float(maxval);
+            ratio := minval / maxval;
 
             Put(long_float'image(time));
             Put(HT);
@@ -95,14 +93,13 @@ begin
             Put(HT);
             Put(long_float'image(room(maxSize, maxSize, maxSize)));
             Put(HT);
-            Put_Line(long_float'image(ratio));
-
+            Put(long_float'image(ratio));
+            Put_Line("");
         end loop;
 
         New_Line;
         Put("Box equilibrated in ");
         Put(long_float'image(time));
         Put_Line(" seconds of simulated time.");
-
     end;
 end Diffusion;
