@@ -16,7 +16,7 @@ program main
     integer :: max_size
     character(len = 20) :: arg
 
-    real(kind = 8) :: diffusion_constant
+    real(kind = 8) :: diffusion_coefficient
     real(kind = 8) :: room_dimension                ! In meters.                              
     real(kind = 8) :: speed_of_gas_molecules        ! Based on 100 g/mol.
     real(kind = 8) :: timestep                      ! h in seconds.
@@ -30,12 +30,12 @@ program main
     read(arg, *) max_size
     allocate(room(max_size, max_size, max_size))
 
-    diffusion_constant = 0.175
+    diffusion_coefficient = 0.175
     room_dimension = 5.0
     speed_of_gas_molecules = 250.0
     timestep = (room_dimension / speed_of_gas_molecules) / max_size
     distance_between_blocks = room_dimension / max_size
-    D_Term = (diffusion_constant * timestep) / (distance_between_blocks ** 2)
+    D_Term = (diffusion_coefficient * timestep) / (distance_between_blocks ** 2)
     time = 0.0
     ratio = 0.0
 
@@ -76,7 +76,7 @@ program main
         write(*, "(f10.3)", advance = 'no') time
         write(*, "(4x, 4es15.5)", advance = 'no') room(1, 1, 1), room(max_size, 1, 1)
         write(*, "(4x, 4es15.5)", advance = 'no') room(max_size, max_size, 1), room(max_size, max_size, max_size)
-        write(*, "(4x, 4es15.5)") sum(room)
+        write(*, "(4x, 4es15.5)") ratio
 
     end do
 

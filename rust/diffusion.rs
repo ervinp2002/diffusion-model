@@ -17,12 +17,12 @@ fn main() {
     let partition_present: bool = if args.len() - 1 >= 1 && args[args.len() - 1] == "partition" {true} else {false};
 
     // Pre-defined values. 
-    const DIFFUSION_CONSTANT: f64 = 0.175;             
+    const DIFFUSION_COEFFICIENT: f64 = 0.175;             
     const ROOM_DIMENSION: f64 = 5.0;                                                      // In meters. 
     const SPEED_OF_GAS_MOLECULES: f64 = 250.0;                                            // Based on 100 g/mol
     let timestep: f64 = (ROOM_DIMENSION / SPEED_OF_GAS_MOLECULES) / (max_size as f64);    // h in seconds
     let distance_between_blocks: f64 = ROOM_DIMENSION / (max_size as f64);
-    let d_term: f64 = (DIFFUSION_CONSTANT * timestep) / (distance_between_blocks * distance_between_blocks);
+    let d_term: f64 = (DIFFUSION_COEFFICIENT * timestep) / (distance_between_blocks * distance_between_blocks);
 
     // Mutable variables to be used. 
     let mut time: f64 = 0.0;
@@ -60,9 +60,9 @@ fn main() {
         let mut minval: f64 = room[0][0][0];
         let mut maxval: f64 = room[0][0][0];
     
-        for i in 0..max_size as usize{
-            for j in 0..max_size as usize{
-                for k in 0..max_size as usize{
+        for i in 0..max_size as usize {
+            for j in 0..max_size as usize {
+                for k in 0..max_size as usize {
                     maxval = if room[i][j][k] > maxval {room[i][j][k]} else {maxval};
                     minval = if room[i][j][k] < minval {room[i][j][k]} else {minval};
                     _sumval += room[i][j][k];
@@ -71,7 +71,8 @@ fn main() {
         } 
     
         ratio = minval / maxval;
-        println!("{:.3} \x09 {:.5e} \x09 {:.5e} \x09 {:.5e} \x09 {:.5e} \x09 {:.5e}", time, 
+        println!("{:.3} \x09 {:.5e} \x09 {:.5e} \x09 {:.5e} \x09 {:.5e} \x09 {:.5e}", 
+            time, 
             room[0][0][0], 
             room[max_size as usize - 1][0][0], 
             room[max_size as usize - 1][max_size as usize - 1][0], 

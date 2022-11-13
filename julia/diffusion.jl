@@ -10,12 +10,12 @@ maxSize = isa(ARGS[1], Number) ? Int64(ARGS[1]) : 10
 partitionPresent = length(ARGS) - 1 >= 1 && ARGS[2] == "partition" ? true : false
 
 # Pre-defined variables
-diffusionConstant = 0.175
+diffusionCoefficient = 0.175
 roomDimension = 5                                                   # In Meters
 speedOfGasMolecules = 250.0                                         # Based on 100 g/mol
 timestep = (roomDimension / speedOfGasMolecules) / maxSize          # h in seconds
 distanceBetweenBlocks = roomDimension / maxSize
-DTerm = (diffusionConstant * timestep) / (distanceBetweenBlocks ^ 2)
+DTerm = (diffusionCoefficient * timestep) / (distanceBetweenBlocks ^ 2)
 time = 0
 change = 0
 ratio = 0
