@@ -86,7 +86,7 @@ void setBitMask(BitMask &BitMask, const int &maxSize) {
     // POST: Adjusts the the BitMask by putting in 1 in indices where the partition is present or is a wall.
 
     // Sets up partition.
-    for (int j = (maxSize / 4) + 1; j < maxSize + 2; j++) {
+    for (int j = floor((maxSize / 4) + 1); j < maxSize + 2; j++) {
         for (int k = 0; k < maxSize + 2; k++) {
             BitMask[maxSize / 2][j][k] = 1;
         }
