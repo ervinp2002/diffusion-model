@@ -3,6 +3,9 @@
 ! Project 2: Simplified 3D Diffusion Model
 ! Implementation in Fortran 95
 
+! To compile: gfortran diffusion.f95 -O2
+! To execute: ./[binary file name] [number of subdivisions] ["partition" (leave blank if none)]
+
 program main
     implicit none
     ! PRE: Command line argument is passed to specfiy amount of subdivisions. 
@@ -41,49 +44,49 @@ program main
         allocate(mask(0 : max_size + 1, 0 : max_size + 1, 0 : max_size + 1))
         mask = 0
 
-        ! Set up the partition
+        ! Set up the 75% partition. 
         do j = floor(real((max_size / 4) + 1)), max_size + 1
             do k = 0, max_size + 1
                 mask(max_size / 2, j, k) = 1
             end do
         end do
 
-        ! Front-facing side
+        ! Set up the front-facing wall.
         do j = 0, max_size + 1
             do k = 0, max_size + 1
                 mask(0, j, k) = 1
             end do 
         end do
 
-        ! Back-facing side
+        ! Set up the back-facing wall. 
         do j = 0, max_size + 1
             do k = 0, max_size + 1
                 mask(max_size + 1, j, k) = 1
             end do 
         end do
 
-        ! Top-facing side
+        ! Set up the room's ceiling.
         do i = 0, max_size + 1
             do k = 0, max_size + 1
                 mask(i, 0, k) = 1
             end do 
         end do
 
-        ! Bottom-facing side
+        ! Set up the room's floor.
         do i = 0, max_size + 1
             do k = 0, max_size + 1
                 mask(i, max_size + 1, k) = 1
             end do 
         end do 
 
-        ! Left-facing side
+        ! Set up the left-facing wall. 
         do i = 0, max_size + 1
             do j = 0, max_size + 1
                 mask(i, j, 0) = 1
             end do 
         end do 
 
-        ! Right-facing side 
+        ! Set up the right-facing wall.
         do i = 0, max_size + 1
             do j = 0, max_size + 1
                 mask(i, j, max_size + 1) = 1
@@ -105,19 +108,19 @@ program main
     room(1, 1, 1) = 1.0e21      ! Initialize first cell so it first contains the molecules.
 
     do while (ratio < 0.99)
+        ! This checks every adjacent spot in 6 degrees of freedom for the molecules to move to.
         do i = 1, max_size
             do j = 1, max_size
                 do k = 1, max_size
                     do l = 1, max_size
                         do m = 1, max_size
-                            do n = 1, max_size
-                                ! This checks every adjacent spot for the molecules to propagate to. 
-                                if ((((i == l) .and. (j == m) .and. (k == n + 1))) .or. &
-                                    ((i == l) .and. (j == m) .and. (k == n - 1)) .or. &
-                                    ((i == l) .and. (j == m + 1) .and. (k == n)) .or. &
-                                    ((i == l) .and. (j == m - 1) .and. (k == n)) .or. &
-                                    ((i == l + 1) .and. (j == m) .and. (k == n)) .or. &
-                                    ((i == l - 1) .and. (j == m) .and. (k == n))) then
+                            do n = 1, max_size 
+                                if ((((i == l) .and. (j == m) .and. (k == n + 1))) .or. &   ! Move down. 
+                                    ((i == l) .and. (j == m) .and. (k == n - 1)) .or. &     ! Move up. 
+                                    ((i == l) .and. (j == m + 1) .and. (k == n)) .or. &     ! Move right. 
+                                    ((i == l) .and. (j == m - 1) .and. (k == n)) .or. &     ! Move left.
+                                    ((i == l + 1) .and. (j == m) .and. (k == n)) .or. &     ! Move forward. 
+                                    ((i == l - 1) .and. (j == m) .and. (k == n))) then      ! Move backwards. 
                                         if (partitionPresent .eqv. .true.) then
                                             if (mask(k, j, i) == 0 .and. mask(n, m, l) == 0) then
                                                 call change_values(change, room(k, j, i), room(n, m, l), D_Term)

@@ -5,7 +5,11 @@ Project 2: Simplified 3D Diffusion Model
 Implementation in C++
 */
 
-// On command line: ./[binary file name] [number of subdivisions] ["partition" (leave blank if none)]
+/*
+To compile: c++ diffusion.cpp -O2
+To execute: ./[binary file name] [number of subdivisions] ["partition" (leave blank if none)]
+*/
+
 using namespace std;
 #include <iostream>
 #include <algorithm>
@@ -62,12 +66,12 @@ void diffusion(Cube &room, BitMask &BitMask, const int &maxSize, const double &D
                 for (int l = 0; l < maxSize; l++) {
                     for (int m = 0; m < maxSize; m++) {
                         for (int n = 0; n < maxSize; n++) {
-                            if ((((i == l) && (j == m) && (k == n + 1)) ||  // move down
-                                ((i == l) && (j == m) && (k == n - 1)) ||  // move up
-                                ((i == l) && (j == m + 1) && (k == n)) ||  // move right
-                                ((i == l) && (j == m - 1) && (k == n)) ||  // move left
-                                ((i == l + 1) && (j == m) && (k == n)) ||  // move forward
-                                ((i == l - 1) && (j == m) && (k == n))) && // move backwards
+                            if ((((i == l) && (j == m) && (k == n + 1)) ||      // move down
+                                ((i == l) && (j == m) && (k == n - 1)) ||       // move up
+                                ((i == l) && (j == m + 1) && (k == n)) ||       // move right
+                                ((i == l) && (j == m - 1) && (k == n)) ||       // move left
+                                ((i == l + 1) && (j == m) && (k == n)) ||       // move forward
+                                ((i == l - 1) && (j == m) && (k == n))) &&      // move backwards
                                 (BitMask[i + 1][j + 1][k + 1] == 0 && BitMask[l + 1][m + 1][n + 1] == 0)) {  
                                 change = (room[i][j][k] - room[l][m][n]) * DTerm;
                                 room[i][j][k] = room[i][j][k] - change;
@@ -85,42 +89,42 @@ void setBitMask(BitMask &BitMask, const int &maxSize) {
     // PRE: BitMask and number of subdivisions have been initialized. 
     // POST: Adjusts the the BitMask by putting in 1 in indices where the partition is present or is a wall.
 
-    // Sets up partition.
+    // Set up the 75% partition.
     for (int j = floor((maxSize / 4) + 1); j < maxSize + 2; j++) {
         for (int k = 0; k < maxSize + 2; k++) {
             BitMask[maxSize / 2][j][k] = 1;
         }
     }
 
-    // Front-facing side
+    // Set up the front-facing wall.
     for (int j = 0; j < maxSize + 2; j++) {
         for (int k = 0; k < maxSize + 2; k++) {
             BitMask[0][j][k] = 1;
         }
     }
 
-    // Back-facing side
+    // Set up the back-facing wall. 
     for (int j = 0; j < maxSize + 2; j++) {
         for (int k = 0; k < maxSize + 2; k++) {
             BitMask[maxSize + 1][j][k] = 1;
         }
     }
 
-    // Top side 
+    // Set up the room's ceiling.
     for (int i = 0; i < maxSize + 2; i++) {
         for (int k = 0; k < maxSize + 2; k++) {
             BitMask[i][0][k] = 1;
         }
     }
 
-    // Bottom side
+    // Set up the left-facing wall. 
     for (int i = 0; i < maxSize + 2; i++) {
         for (int k = 0; k < maxSize + 2; k++) {
             BitMask[i][maxSize + 1][k] = 1;
         }
     }
 
-    // Left-facing side
+    // Set up the right-facing wall.
     for (int i = 0; i < maxSize + 2; i++) {
         for (int j = 0; j < maxSize + 2; j++) {
             BitMask[i][j][0] = 1;
