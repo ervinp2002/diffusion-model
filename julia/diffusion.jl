@@ -24,6 +24,18 @@ ratio = 0
 room = zeros(Float64, maxSize, maxSize, maxSize)
 room[1, 1, 1] = 1.0e21                                              # Initialize first cell so it first contains the molecules.
 
+if partitionPresent
+    mask = zeros(Int32, maxSize + 2, maxSize + 2, maxSize)
+
+    # Set up 75% partition in mask. 
+    for j in (maxSize / 4) + 1 : maxSize 
+        for k in 1 : maxSize
+            mask[Int32(maxSize / 2), Int32(round(j)), k] = 1
+        end 
+    end
+
+end 
+
 while ratio < 0.99
     for i in 1 : maxSize
         for j in 1 : maxSize
@@ -31,30 +43,23 @@ while ratio < 0.99
                 for l in 1 : maxSize
                     for m in 1 : maxSize
                         for n in 1 : maxSize
-                            if i == l && j == m && k == n + 1
-                                global change = (room[i, j, k] - room[l, m, n]) * DTerm
-                                room[i, j, k] -= change
-                                room[l, m, n] += change
-                            elseif i == l && j == m && k == n - 1
-                                global change = (room[i, j, k] - room[l, m, n]) * DTerm
-                                room[i, j, k] -= change
-                                room[l, m, n] += change
-                            elseif i == l && j == m + 1 && k == n 
-                                global change = (room[i, j, k] - room[l, m, n]) * DTerm
-                                room[i, j, k] -= change
-                                room[l, m, n] += change
-                            elseif i == l && j == m - 1 && k == n
-                                global change = (room[i, j, k] - room[l, m, n]) * DTerm
-                                room[i, j, k] -= change
-                                room[l, m, n] += change
-                            elseif i == l + 1 && j == m && k == n 
-                                global change = (room[i, j, k] - room[l, m, n]) * DTerm
-                                room[i, j, k] -= change
-                                room[l, m, n] += change
-                            elseif i == l - 1 && j == m && k == n
-                                global change = (room[i, j, k] - room[l, m, n]) * DTerm
-                                room[i, j, k] -= change
-                                room[l, m, n] += change
+                            if ((i == l && j == m && k == n + 1) ||
+                                (i == l && j == m && k == n - 1) ||
+                                (i == l && j == m + 1 && k == n) ||
+                                (i == l && j == m - 1 && k == n) ||
+                                (i == l + 1 && j == m && k == n) ||
+                                (i == l - 1 && j == m && k == n))
+                                if partitionPresent
+                                    if mask[i, j, k] == 0 && mask[l, m, n] == 0
+                                        global change = (room[i, j, k] - room[l, m, n]) * DTerm
+                                        room[i, j, k] -= change
+                                        room[l, m, n] += change
+                                    end
+                                else
+                                    global change = (room[i, j, k] - room[l, m, n]) * DTerm
+                                    room[i, j, k] -= change
+                                    room[l, m, n] += change  
+                                end
                             end
                         end
                     end
@@ -71,9 +76,11 @@ while ratio < 0.99
     for i in 1 : maxSize
         for j in 1 : maxSize
             for k in 1 : maxSize
-                maxval = max(room[i, k, j], maxval)
-                minval = min(room[i, k, j], minval)
-                sumval += room[i, k, j]
+                if room[i, k, j] != 0
+                    maxval = max(room[i, k, j], maxval)
+                    minval = min(room[i, k, j], minval)
+                    sumval += room[i, k, j]
+                end
             end
         end
     end
