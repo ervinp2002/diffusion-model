@@ -11,6 +11,7 @@ procedure Diffusion is
 -- PRE: Command line argument is passed to specfiy amount of subdivisions. 
 -- POST: Outputs simulated time with specified data points.
     type Cube is array (Integer range <>, Integer range <>, Integer range <>) of Long_Float;
+    type Mask is array (Integer range<>, Integer range <>, Integer range<>) of Integer;
     maxSize: Integer := Integer'Value(Argument(1));
     
 begin
