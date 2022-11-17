@@ -47,14 +47,14 @@ if partitionPresent
         end 
     end
     
-    # Set up top-facing wall. 
+    # Set up the room's ceiling. 
     for i in 1 : maxSize + 2
         for k in 1 : maxSize + 2
             mask[i, 1, k] = 1
         end 
     end 
 
-    # Set up bottom-facing wall. 
+    # Set up the room's floor. 
     for i in 1 : maxSize + 2
         for k in 1 : maxSize + 2
             mask[i, maxSize + 2, k] = 1
