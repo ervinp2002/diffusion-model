@@ -117,21 +117,21 @@ void setBitMask(BitMask &BitMask, const int &maxSize) {
         }
     }
 
-    // Set up the left-facing wall. 
+    // Set up the room's floor. 
     for (int i = 0; i < maxSize + 2; i++) {
         for (int k = 0; k < maxSize + 2; k++) {
             BitMask[i][maxSize + 1][k] = 1;
         }
     }
 
-    // Set up the right-facing wall.
+    // Set up the left-facing wall.
     for (int i = 0; i < maxSize + 2; i++) {
         for (int j = 0; j < maxSize + 2; j++) {
             BitMask[i][j][0] = 1;
         }
     }
 
-    // Right-facing side
+    // Set up the right-facing wall. 
     for (int i = 0; i < maxSize + 2; i++) {
         for (int j = 0; j < maxSize + 2; j++) {
             BitMask[i][j][maxSize + 1] = 1;
@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
     // POST: Outputs the ratio of concentration and time taken to equilibrate the room. 
 
     // Number of subdivisions per dimension is determined by command-line argument. Defaults to 10 if there's no argument. 
-    const int maxSize = atoi(argv[argc - 2]) > 0 ? atoi(argv[argc - 2]) : 10;
+    const int maxSize = stoi(argv[1]) > 0 ? stoi(argv[1]) : 10;
 
     // Specify if there is a flag to set up partition in the room.
     string arg2 = argv[argc - 1];
