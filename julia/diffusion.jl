@@ -5,6 +5,7 @@ Project 2: Simplified 3D Diffusion Model
 Implementation in Julia
 =#
 
+using Printf
 # Flags to be determined by the user when passing in command-line arguments.
 maxSize = isa(ARGS[1], Number) ? Int64(ARGS[1]) : 10
 partitionPresent = length(ARGS) - 1 >= 1 && ARGS[2] == "partition" ? true : false
@@ -17,20 +18,60 @@ timestep = (roomDimension / speedOfGasMolecules) / maxSize          # h in secon
 distanceBetweenBlocks = roomDimension / maxSize
 DTerm = (diffusionCoefficient * timestep) / (distanceBetweenBlocks ^ 2)
 time = 0
-change = 0
 ratio = 0
 
 # 3D Array to represent the room. 
 room = zeros(Float64, maxSize, maxSize, maxSize)
 room[1, 1, 1] = 1.0e21                                              # Initialize first cell so it first contains the molecules.
-
 if partitionPresent
-    mask = zeros(Int32, maxSize + 2, maxSize + 2, maxSize)
+    mask = zeros(Int32, maxSize + 2, maxSize + 2, maxSize + 2)
 
     # Set up 75% partition in mask. 
-    for j in (maxSize / 4) + 1 : maxSize 
-        for k in 1 : maxSize
-            mask[Int32(maxSize / 2), Int32(round(j)), k] = 1
+    for j in Int32(floor((maxSize + 2) / 4) + 2): maxSize + 2
+        for k in 1 : maxSize + 2
+            mask[Int32(maxSize / 2), j, k] = 1
+        end 
+    end
+
+    # Set up front-facing wall. 
+    for j in 1 : maxSize + 2
+        for k in 1 : maxSize + 2
+            mask[1, j, k] = 1
+        end
+    end
+    
+    # Set up back-facing wall. 
+    for j in 1 : maxSize + 2
+        for k in 1 : maxSize + 2
+            mask[maxSize + 2, j, k] = 1
+        end 
+    end
+    
+    # Set up top-facing wall. 
+    for i in 1 : maxSize + 2
+        for k in 1 : maxSize + 2
+            mask[i, 1, k] = 1
+        end 
+    end 
+
+    # Set up bottom-facing wall. 
+    for i in 1 : maxSize + 2
+        for k in 1 : maxSize + 2
+            mask[i, maxSize + 2, k] = 1
+        end 
+    end 
+
+    # Set up left-facing wall. 
+    for i in 1 : maxSize + 2
+        for j in 1 : maxSize + 2
+            mask[i, j, 1] = 1
+        end 
+    end 
+
+    # Set up right-facing wall.
+    for i in 1 : maxSize + 2
+        for j in 1 : maxSize + 2
+            mask[i, j, maxSize + 2] = 1
         end 
     end
 
@@ -50,13 +91,13 @@ while ratio < 0.99
                                 (i == l + 1 && j == m && k == n) ||
                                 (i == l - 1 && j == m && k == n))
                                 if partitionPresent
-                                    if mask[i, j, k] == 0 && mask[l, m, n] == 0
-                                        global change = (room[i, j, k] - room[l, m, n]) * DTerm
+                                    if mask[i + 1, j + 1, k + 1] == 0 && mask[l + 1, m + 1, n + 1] == 0
+                                        change = (room[i, j, k] - room[l, m, n]) * DTerm
                                         room[i, j, k] -= change
                                         room[l, m, n] += change
                                     end
                                 else
-                                    global change = (room[i, j, k] - room[l, m, n]) * DTerm
+                                    change = (room[i, j, k] - room[l, m, n]) * DTerm
                                     room[i, j, k] -= change
                                     room[l, m, n] += change  
                                 end
@@ -76,10 +117,10 @@ while ratio < 0.99
     for i in 1 : maxSize
         for j in 1 : maxSize
             for k in 1 : maxSize
-                if room[i, k, j] != 0
-                    maxval = max(room[i, k, j], maxval)
-                    minval = min(room[i, k, j], minval)
-                    sumval += room[i, k, j]
+                if room[i, j, k] != 0
+                    maxval = max(maxval, room[i, j, k])
+                    minval = min(minval, room[i, j, k])
+                    sumval += room[i, j, k]
                 end
             end
         end
@@ -87,10 +128,14 @@ while ratio < 0.99
 
     global ratio = minval / maxval
     print(string(round(time; digits = 3)))
-    print(" \t ", string(round(room[1, 1, 1]; digits = 5)))
-    print(" \t ", string(round(room[maxSize, 1, 1]; digits = 5)))
-    print(" \t ", string(round(room[maxSize, maxSize, 1]; digits = 5)))
-    print(" \t ", string(round(room[maxSize, maxSize, maxSize]; digits = 5)))
+    print(" \t ")
+    @printf("% e", room[1, 1, 1])
+    print(" \t ")
+    @printf("% e", room[maxSize, 1, 1])
+    print(" \t ")
+    @printf("% e", room[maxSize, maxSize, 1])
+    print(" \t ")
+    @printf("% e", room[maxSize, maxSize, maxSize])
     println(" \t ", string(ratio))
 end
      
