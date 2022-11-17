@@ -28,7 +28,60 @@ fn main() {
     let mut time: f64 = 0.0;
     let mut ratio: f64 = 0.0;
     let mut room = vec![vec![vec![0.0; max_size as usize]; max_size as usize]; max_size as usize];
+    let mut mask = vec![vec![vec![0; (max_size + 2) as usize]; (max_size + 2) as usize]; (max_size + 2) as usize];
     room[0][0][0] = 1e+21_f64;
+
+    if partition_present {
+        // Set up the 75% partition. 
+        for j in (((max_size / 4) + 1) as f64).floor() as usize..(max_size + 2) as usize {
+            for k in 0..(max_size + 2) as usize {
+                mask[((max_size / 2) as f64).floor() as usize][j][k] = 1;
+            }
+        }
+
+        // Set up the front-facing wall. 
+        for j in 0..(max_size + 2) as usize {
+            for k in 0..(max_size + 2) as usize {
+                mask[0][j][k] = 1;
+            }
+        }
+
+        // Set up the back-facing wall.
+        for j in 0..(max_size + 2) as usize {
+            for k in 0..(max_size + 2) as usize {
+                mask[(max_size + 1) as usize][j][k] = 1;
+            }
+        }
+
+        // Set up the room's ceiling.
+        for i in 0..(max_size + 2) as usize {
+            for k in 0..(max_size + 2) as usize {
+                mask[i][0][k] = 1;
+            }
+        }
+
+        // Set up the room's floor. 
+        for i in 0..(max_size + 2) as usize {
+            for k in 0..(max_size + 2) as usize {
+                mask[i][(max_size + 1) as usize][k] = 1;
+            }
+        }
+
+        // Set up the left-facing wall.
+        for i in 0..(max_size + 2) as usize {
+            for j in 0..(max_size + 2) as usize {
+                mask[i][j][0] = 1;
+            }
+        }
+
+        // Set up the right-facing wall. 
+        for i in 0..(max_size + 2) as usize {
+            for j in 0..(max_size + 2) as usize {
+                mask[i][j][(max_size + 1) as usize] = 1;
+            }
+        }
+
+    }
 
     while ratio < 0.99 {
         for i in 0..max_size {
@@ -43,10 +96,21 @@ fn main() {
                                     (i == l && j == m - 1 && k == n) ||                     // move left
                                     (i == l + 1 && j == m && k == n) ||                     // move forward
                                     (i == l - 1 && j == m && k == n) {                      // move backwards
-                                    let change = (room[i as usize][j as usize][k as usize] 
+                                    if partition_present {
+                                        if mask[(i + 1) as usize][(j + 1) as usize][(k + 1) as usize] == 0 &&
+                                        mask[(l + 1) as usize][(j + 1) as usize][(k + 1) as usize] == 0 {
+
+                                            let change = (room[i as usize][j as usize][k as usize] 
                                                 - room[l as usize][m as usize][n as usize]) * d_term;
-                                    room[i as usize][j as usize][k as usize] -= change;
-                                    room[l as usize][m as usize][n as usize] += change;
+                                            room[i as usize][j as usize][k as usize] -= change;
+                                            room[l as usize][m as usize][n as usize] += change;
+                                        }
+                                    } else {
+                                        let change = (room[i as usize][j as usize][k as usize] 
+                                            - room[l as usize][m as usize][n as usize]) * d_term;
+                                        room[i as usize][j as usize][k as usize] -= change;
+                                        room[l as usize][m as usize][n as usize] += change;
+                                    }   
                                 }
                             }
                         }
@@ -63,9 +127,11 @@ fn main() {
         for i in 0..max_size as usize {
             for j in 0..max_size as usize {
                 for k in 0..max_size as usize {
-                    maxval = if room[i][j][k] > maxval {room[i][j][k]} else {maxval};
-                    minval = if room[i][j][k] < minval {room[i][j][k]} else {minval};
-                    _sumval += room[i][j][k];
+                    if room[i][j][k] != 0.0 {
+                        maxval = maxval.max(room[i][j][k]);
+                        minval = minval.min(room[i][j][k]);
+                        _sumval += room[i][j][k];
+                    }  
                 }
             }
         } 
