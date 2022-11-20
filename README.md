@@ -13,7 +13,8 @@ Python 3
 
 Fortran 95
 
-    gfortran diffusion.f95 [# of subdivisions] [partition (blank if simulating without it)]
+    gfortran diffusion.f95 -O2
+    ./a.out [# of subdivisions] [partition (blank if simulating without it)]
 
 Rust
 
