@@ -1,3 +1,5 @@
+#!/usr2/local/julia-1.8.2/bin/julia
+
 #=
 Ervin Pangilinan
 CSC 330: Organization of Programming Languages - Fall 2022
@@ -7,7 +9,7 @@ Implementation in Julia
 
 using Printf
 # Flags to be determined by the user when passing in command-line arguments.
-maxSize = isa(ARGS[1], Number) ? Int64(ARGS[1]) : 10
+maxSize = parse(Int64, ARGS[1])
 partitionPresent = length(ARGS) - 1 >= 1 && ARGS[2] == "partition" ? true : false
 
 # Pre-defined variables
@@ -24,57 +26,14 @@ ratio = 0
 room = zeros(Float64, maxSize, maxSize, maxSize)
 room[1, 1, 1] = 1.0e21                                              # Initialize first cell so it first contains the molecules.
 if partitionPresent
-    mask = zeros(Int32, maxSize + 2, maxSize + 2, maxSize + 2)
+    mask = zeros(Int32, maxSize, maxSize, maxSize)
 
     # Set up 75% partition in mask. 
-    for j in Int32(floor((maxSize + 2) / 4) + 2): maxSize + 2
-        for k in 1 : maxSize + 2
+    for j in Int32(floor((maxSize) / 4) + 1): maxSize
+        for k in 1 : maxSize
             mask[Int32(maxSize / 2), j, k] = 1
         end 
     end
-
-    # Set up front-facing wall. 
-    for j in 1 : maxSize + 2
-        for k in 1 : maxSize + 2
-            mask[1, j, k] = 1
-        end
-    end
-    
-    # Set up back-facing wall. 
-    for j in 1 : maxSize + 2
-        for k in 1 : maxSize + 2
-            mask[maxSize + 2, j, k] = 1
-        end 
-    end
-    
-    # Set up the room's ceiling. 
-    for i in 1 : maxSize + 2
-        for k in 1 : maxSize + 2
-            mask[i, 1, k] = 1
-        end 
-    end 
-
-    # Set up the room's floor. 
-    for i in 1 : maxSize + 2
-        for k in 1 : maxSize + 2
-            mask[i, maxSize + 2, k] = 1
-        end 
-    end 
-
-    # Set up left-facing wall. 
-    for i in 1 : maxSize + 2
-        for j in 1 : maxSize + 2
-            mask[i, j, 1] = 1
-        end 
-    end 
-
-    # Set up right-facing wall.
-    for i in 1 : maxSize + 2
-        for j in 1 : maxSize + 2
-            mask[i, j, maxSize + 2] = 1
-        end 
-    end
-
 end 
 
 while ratio < 0.99
@@ -91,7 +50,7 @@ while ratio < 0.99
                                 (i == l + 1 && j == m && k == n) ||
                                 (i == l - 1 && j == m && k == n))
                                 if partitionPresent
-                                    if mask[i + 1, j + 1, k + 1] == 0 && mask[l + 1, m + 1, n + 1] == 0
+                                    if mask[i, j, k] == 0 && mask[l, m, n] == 0
                                         change = (room[i, j, k] - room[l, m, n]) * DTerm
                                         room[i, j, k] -= change
                                         room[l, m, n] += change
