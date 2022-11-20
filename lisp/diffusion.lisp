@@ -49,65 +49,27 @@
         )
     )
     (setf (aref cube 0 0 0) 1.0e21)         ; Initialize first index to contain all of the molecules. 
+    (setf mask (make-array (list maxSize maxSize maxSize)))
 
-    (if (string= (nth 2 sb-ext:*posix-argv*) "partition")
+    (if (string= partitionPresent "partition")
         (progn
-            (setf mask (make-array (list (+ 2 maxSize) (+ 2 maxSize) (+ 2 maxSize))))
-            
+            ; Set everything in the mask to 0. 
+            (dotimes (i maxSize)
+                (dotimes (j maxSize)
+                    (dotimes (k maxSize)
+                        (setf (aref mask i j k) 0)
+                    )
+                )
+            )
+
             ; Set up 75% partition. 
-            (setf i (+ (floor (/ maxSize 4)) 1))
-            (setf j 0)
+            (setf j (+ (floor (/ maxSize 4)) 1))
             (setf k 0)
-            (dotimes (i (+ maxSize 1))
-                (dotimes (j (+ maxSize 1))
+            (dotimes (j maxSize)
+                (dotimes (k maxSize)
                     (setf (aref mask (floor (/ maxSize 2)) j k) 1)
                 )
             ) 
-
-            ; Set up the front-facing wall.
-            (setf j 0)
-            (setf k 0)
-            (dotimes (j (+ maxSize 1))
-                (dotimes (k (+ maxSize 1))
-                    (setf (aref mask 0 j k) 1)
-                )
-            ) 
-              
-            ; Set up the back-facing wall.
-            (setf j 0)
-            (setf k 0)
-            (dotimes (j (+ maxSize 1))
-                (dotimes (k (+ maxSize 1))
-                    (setf (aref mask (+ maxSize 1) j k) 1)
-                )
-            ) 
-
-            ; Set up the ceiling.
-            (setf i 0)
-            (setf k 0)
-            (dotimes (i (+ maxSize 1))
-                (dotimes (k (+ maxSize 1))
-                    (setf (aref mask i 0 k) 1)
-                )
-            )
-
-            ; Set up the left-facing wall.
-            (setf i 0)
-            (setf j 0)
-            (dotimes (i (+ maxSize 1))
-                (dotimes (j (+ maxSize 1))
-                    (setf (aref mask i j 0) 1)
-                )
-            )
-
-            ; Set up the right-facing wall.
-            (setf i 0)
-            (setf j 0)
-            (dotimes (i (+ maxSize 1))
-                (dotimes (j (+ maxSize 1))
-                    (setf (aref mask i j (+ maxSize 1)) 1)
-                )
-            )
         )
     )
 
@@ -136,7 +98,8 @@
                                     (progn
                                         (if (string= partitionPresent "partition")
                                             (prog1
-                                                (if (and (= (aref mask (+ i 1) (+ j 1) (+ k 1)) 0) (= (aref mask (+ l 1) (+ m 1) (+ n 1)) 0))
+                                                (if (and (= (aref mask i j k) 0) 
+                                                         (= (aref mask l m n) 0))
                                                     (prog2
                                                         (setf change (* (- (aref cube i j k) (aref cube l m n)) DTerm))
                                                         (decf (aref cube i j k) change)
@@ -159,7 +122,7 @@
             )
         )
 
-        (setf simulatedTime (+ simulatedTime timestep))
+        (incf simulatedTime timestep)
         (setf maxval (aref cube 0 0 0))
         (setf minval (aref cube 0 0 0))
         (setf sumval 0)
@@ -172,11 +135,11 @@
         (dotimes (i maxSize)
             (dotimes (j maxSize)
                 (dotimes (k maxSize)
-                    (if (and (/= (aref cube i j k) 0) (/= (aref cube i j k) 0))
+                    (if (/= (aref cube i j k) 0)
                         (progn 
                             (setf maxval (max (aref cube i j k) maxval))    ; Check for the maximum value in cube.
                             (setf minval (min (aref cube i j k) minval))    ; Check for the minimum value in cube.
-                            (setf sumval (+ sumval (aref cube i j k)))
+                            (incf sumval (aref cube i j k))
                         )  
                     )
                 )
@@ -184,7 +147,8 @@
         )
         (setf roomRatio (/ minval maxval))
 
-        (princ simulatedTime)
+        (setf i 3)
+        (format t "~,vf" i simulatedTime)
         (write-char #\Tab)
         (princ (aref cube 0 0 0))
         (write-char #\Tab)
@@ -201,7 +165,8 @@
 
     (terpri)
     (princ "Box equilbirated in ")
-    (princ simulatedTime)
+    (setf i 3)
+    (format t "~,vf" i simulatedTime)
     (princ " seconds of simulated time.")
     (terpri)
 )
