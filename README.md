@@ -26,7 +26,7 @@ Julia
     chmod u+x diffusion.jl
     ./diffusion.jl [# of subdivisions] [partition (blank if simulating without it)]
 
-Ada
+Ada (Maximum Value for maxSize: 88)
 
     gnatmake diffusion.adb -O2 -gnat2012
     diffusion [# of subdivisions] [partition (blank if simulating without it)]
