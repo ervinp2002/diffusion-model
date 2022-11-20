@@ -23,7 +23,8 @@ Rust
 
 Julia
 
-    julia diffusion.jl [# of subdivisions] [partition (blank if simulating without it)]
+    chmod u+x diffusion.jl
+    ./diffusion.jl [# of subdivisions] [partition (blank if simulating without it)]
 
 Ada
 
